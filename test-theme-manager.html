@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theme Manager Test - To-Do List Life Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .test-container {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .test-section {
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--bg-secondary);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+    }
+    .test-section h2 {
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      font-size: var(--font-size-xl);
+    }
+    .test-section h3 {
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      font-size: var(--font-size-lg);
+    }
+    .test-section p {
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    .test-result {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: var(--radius-md);
+      font-family: monospace;
+      font-size: var(--font-size-sm);
+    }
+    .test-result.pass {
+      background: var(--success-color);
+      color: white;
+    }
+    .test-result.fail {
+      background: var(--error-color);
+      color: white;
+    }
+    .test-result.info {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    .test-button {
+      background: var(--accent-color);
+      color: white;
+      padding: var(--space-md);
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      font-size: var(--font-size-base);
+      margin: 0.5rem;
+      transition: all var(--transition-base);
+      box-shadow: var(--shadow-sm);
+    }
+    .test-button:hover {
+      background: var(--accent-hover);
+      box-shadow: var(--shadow-md);
+    }
+    .visual-demo {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .demo-card {
+      flex: 1;
+      min-width: 200px;
+      padding: 1rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    .demo-card h4 {
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+    .demo-card p {
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <!-- Notification Container -->
+  <div id="notification-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Theme Toggle Button -->
+  <button id="theme-toggle" class="theme-toggle-btn" aria-label="Switch to dark mode">
+    🌙
+  </button>
+
+  <div class="test-container">
+    <h1 style="color: var(--text-primary); margin-bottom: 2rem;">Theme Manager Test Suite</h1>
+
+    <!-- Test Section 1: Visual Theme Demo -->
+    <div class="test-section">
+      <h2>Visual Theme Demonstration</h2>
+      <p>Click the theme toggle button in the top-right corner to switch between light and dark modes.</p>
+      <div class="visual-demo">
+        <div class="demo-card">
+          <h4>Primary Colors</h4>
+          <p>Background: var(--bg-primary)</p>
+          <p>Text: var(--text-primary)</p>
+        </div>
+        <div class="demo-card">
+          <h4>Secondary Colors</h4>
+          <p>Background: var(--bg-secondary)</p>
+          <p>Text: var(--text-secondary)</p>
+        </div>
+        <div class="demo-card">
+          <h4>Accent Colors</h4>
+          <p style="color: var(--accent-color);">Accent color</p>
+          <p style="color: var(--success-color);">Success color</p>
+          <p style="color: var(--error-color);">Error color</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Section 2: Automated Tests -->
+    <div class="test-section">
+      <h2>Automated Functionality Tests</h2>
+      <button class="test-button" onclick="runAllTests()">Run All Tests</button>
+      <button class="test-button" onclick="clearResults()">Clear Results</button>
+      <div id="test-results"></div>
+    </div>
+
+    <!-- Test Section 3: Manual Tests -->
+    <div class="test-section">
+      <h2>Manual Test Checklist</h2>
+      <h3>Requirements Validation:</h3>
+      <div class="test-result info">
+        <strong>✓ 6.1:</strong> Default theme is light mode (check on fresh load)
+      </div>
+      <div class="test-result info">
+        <strong>✓ 6.2:</strong> Theme toggle button is present and visible
+      </div>
+      <div class="test-result info">
+        <strong>✓ 6.3:</strong> Theme switches within 200ms (click toggle and observe)
+      </div>
+      <div class="test-result info">
+        <strong>✓ 6.4:</strong> All colors update in a single frame (no flashing)
+      </div>
+      <div class="test-result info">
+        <strong>✓ 6.5:</strong> Theme persists to Local Storage (check Application tab in DevTools)
+      </div>
+      <div class="test-result info">
+        <strong>✓ 6.7:</strong> Saved theme loads on page refresh (refresh browser)
+      </div>
+      <div class="test-result info">
+        <strong>✓ 6.9:</strong> Button aria-label updates (inspect element, check accessibility)
+      </div>
+    </div>
+
+    <!-- Test Section 4: Local Storage Inspector -->
+    <div class="test-section">
+      <h2>Local Storage Inspector</h2>
+      <button class="test-button" onclick="inspectStorage()">Inspect Storage</button>
+      <button class="test-button" onclick="clearStorage()">Clear Theme Storage</button>
+      <div id="storage-results"></div>
+    </div>
+  </div>
+
+  <!-- ARIA Live Regions for Screen Reader Announcements -->
+  <div id="timer-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+  <div id="task-announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Test Suite Functions
+    function log(message, type = 'info') {
+      const results = document.getElementById('test-results');
+      const div = document.createElement('div');
+      div.className = `test-result ${type}`;
+      div.textContent = message;
+      results.appendChild(div);
+    }
+
+    function clearResults() {
+      document.getElementById('test-results').innerHTML = '';
+    }
+
+    function runAllTests() {
+      clearResults();
+      log('Starting Theme Manager Tests...', 'info');
+      
+      // Test 1: ThemeManager object exists
+      if (typeof ThemeManager !== 'undefined') {
+        log('✓ Test 1 PASS: ThemeManager object exists', 'pass');
+      } else {
+        log('✗ Test 1 FAIL: ThemeManager object not found', 'fail');
+        return;
+      }
+
+      // Test 2: ThemeManager has required methods
+      const requiredMethods = ['init', 'applyTheme', 'toggle', 'attachEventListeners'];
+      let allMethodsExist = true;
+      requiredMethods.forEach(method => {
+        if (typeof ThemeManager[method] !== 'function') {
+          log(`✗ Test 2 FAIL: ThemeManager.${method}() method missing`, 'fail');
+          allMethodsExist = false;
+        }
+      });
+      if (allMethodsExist) {
+        log('✓ Test 2 PASS: All required methods exist', 'pass');
+      }
+
+      // Test 3: Theme toggle button exists
+      const toggleBtn = document.getElementById('theme-toggle');
+      if (toggleBtn) {
+        log('✓ Test 3 PASS: Theme toggle button exists in DOM', 'pass');
+      } else {
+        log('✗ Test 3 FAIL: Theme toggle button not found', 'fail');
+        return;
+      }
+
+      // Test 4: Button has aria-label
+      const ariaLabel = toggleBtn.getAttribute('aria-label');
+      if (ariaLabel && ariaLabel.length > 0) {
+        log(`✓ Test 4 PASS: Button has aria-label: "${ariaLabel}"`, 'pass');
+      } else {
+        log('✗ Test 4 FAIL: Button missing aria-label', 'fail');
+      }
+
+      // Test 5: Current theme is set
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'light' || currentTheme === 'dark') {
+        log(`✓ Test 5 PASS: Current theme is "${currentTheme}"`, 'pass');
+      } else {
+        log(`✗ Test 5 FAIL: Invalid theme: "${currentTheme}"`, 'fail');
+      }
+
+      // Test 6: appState.theme matches DOM
+      if (appState.theme === currentTheme) {
+        log('✓ Test 6 PASS: appState.theme matches DOM', 'pass');
+      } else {
+        log(`✗ Test 6 FAIL: appState.theme (${appState.theme}) != DOM (${currentTheme})`, 'fail');
+      }
+
+      // Test 7: Toggle functionality
+      const originalTheme = appState.theme;
+      ThemeManager.toggle();
+      const newTheme = appState.theme;
+      if (originalTheme !== newTheme) {
+        log(`✓ Test 7 PASS: Toggle changed theme from ${originalTheme} to ${newTheme}`, 'pass');
+        // Toggle back
+        ThemeManager.toggle();
+      } else {
+        log('✗ Test 7 FAIL: Toggle did not change theme', 'fail');
+      }
+
+      // Test 8: Theme persists to Local Storage
+      try {
+        const savedTheme = localStorage.getItem('lifeDashboard_theme');
+        if (savedTheme) {
+          const parsedTheme = JSON.parse(savedTheme);
+          log(`✓ Test 8 PASS: Theme saved to Local Storage: ${parsedTheme}`, 'pass');
+        } else {
+          log('✗ Test 8 FAIL: No theme found in Local Storage', 'fail');
+        }
+      } catch (error) {
+        log(`✗ Test 8 FAIL: Error reading Local Storage: ${error.message}`, 'fail');
+      }
+
+      // Test 9: Button icon changes with theme
+      const btnIcon = toggleBtn.textContent.trim();
+      const expectedIcon = appState.theme === 'dark' ? '☀️' : '🌙';
+      if (btnIcon === expectedIcon) {
+        log(`✓ Test 9 PASS: Button icon matches theme (${btnIcon})`, 'pass');
+      } else {
+        log(`✗ Test 9 FAIL: Button icon (${btnIcon}) doesn't match expected (${expectedIcon})`, 'fail');
+      }
+
+      log('All tests completed!', 'info');
+    }
+
+    function inspectStorage() {
+      const results = document.getElementById('storage-results');
+      results.innerHTML = '';
+      
+      const div = document.createElement('div');
+      div.className = 'test-result info';
+      
+      try {
+        const theme = localStorage.getItem('lifeDashboard_theme');
+        if (theme) {
+          div.innerHTML = `
+            <strong>Local Storage Contents:</strong><br>
+            Key: lifeDashboard_theme<br>
+            Raw Value: ${theme}<br>
+            Parsed Value: ${JSON.parse(theme)}<br>
+            Current DOM Theme: ${document.documentElement.getAttribute('data-theme')}<br>
+            Current appState.theme: ${appState.theme}
+          `;
+        } else {
+          div.textContent = 'No theme data found in Local Storage';
+        }
+      } catch (error) {
+        div.textContent = `Error reading Local Storage: ${error.message}`;
+      }
+      
+      results.appendChild(div);
+    }
+
+    function clearStorage() {
+      try {
+        localStorage.removeItem('lifeDashboard_theme');
+        alert('Theme data cleared from Local Storage. Refresh the page to see default behavior.');
+      } catch (error) {
+        alert(`Error clearing storage: ${error.message}`);
+      }
+    }
+
+    // Auto-run tests on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        runAllTests();
+        inspectStorage();
+      }, 500);
+    });
+  </script>
+</body>
+</html>

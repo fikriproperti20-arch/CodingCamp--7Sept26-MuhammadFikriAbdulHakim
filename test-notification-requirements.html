@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotificationManager Requirements Verification</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      padding: var(--space-xl);
+      max-width: 1000px;
+      margin: 0 auto;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    
+    h1 {
+      color: var(--text-primary);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .test-section {
+      margin: var(--space-lg) 0;
+      padding: var(--space-md);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+    
+    .test-section.pass {
+      border-color: var(--success-color);
+      background-color: rgba(76, 175, 80, 0.1);
+    }
+    
+    .test-section.fail {
+      border-color: var(--error-color);
+      background-color: rgba(244, 67, 54, 0.1);
+    }
+    
+    .test-title {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+      color: var(--text-primary);
+    }
+    
+    .test-description {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+    }
+    
+    .test-result {
+      font-weight: 500;
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      margin-top: var(--space-sm);
+    }
+    
+    .pass-result {
+      color: var(--success-color);
+    }
+    
+    .fail-result {
+      color: var(--error-color);
+    }
+    
+    button {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: var(--font-size-base);
+      margin-top: var(--space-md);
+    }
+    
+    button:hover {
+      background: var(--accent-hover);
+    }
+    
+    .summary {
+      font-size: var(--font-size-xl);
+      font-weight: bold;
+      padding: var(--space-lg);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-xl);
+      text-align: center;
+    }
+    
+    .summary.all-pass {
+      background-color: rgba(76, 175, 80, 0.2);
+      color: var(--success-color);
+    }
+    
+    .summary.some-fail {
+      background-color: rgba(244, 67, 54, 0.2);
+      color: var(--error-color);
+    }
+  </style>
+</head>
+<body>
+  <h1>NotificationManager Requirements Verification</h1>
+  <p style="color: var(--text-secondary); margin-bottom: var(--space-xl);">
+    This page verifies that the NotificationManager implementation meets all requirements from Task 4.1.
+  </p>
+  
+  <button onclick="runAllTests()">Run All Tests</button>
+  
+  <div id="summary"></div>
+  <div id="test-results"></div>
+
+  <script src="js/script.js"></script>
+  <script>
+    const testResults = [];
+    
+    function recordTest(name, description, passed, details = '') {
+      testResults.push({ name, description, passed, details });
+    }
+    
+    function displayResults() {
+      const summaryDiv = document.getElementById('summary');
+      const resultsDiv = document.getElementById('test-results');
+      
+      const passedCount = testResults.filter(r => r.passed).length;
+      const totalCount = testResults.length;
+      const allPassed = passedCount === totalCount;
+      
+      // Display summary
+      summaryDiv.className = `summary ${allPassed ? 'all-pass' : 'some-fail'}`;
+      summaryDiv.innerHTML = `
+        <div>Tests: ${passedCount}/${totalCount} Passed</div>
+        <div style="font-size: var(--font-size-base); margin-top: var(--space-sm);">
+          ${allPassed ? '✓ All requirements met!' : '✗ Some requirements need attention'}
+        </div>
+      `;
+      
+      // Display individual results
+      resultsDiv.innerHTML = '';
+      testResults.forEach(result => {
+        const testDiv = document.createElement('div');
+        testDiv.className = `test-section ${result.passed ? 'pass' : 'fail'}`;
+        testDiv.innerHTML = `
+          <div class="test-title">${result.passed ? '✓' : '✗'} ${result.name}</div>
+          <div class="test-description">${result.description}</div>
+          <div class="test-result ${result.passed ? 'pass-result' : 'fail-result'}">
+            ${result.passed ? 'PASSED' : 'FAILED'}
+            ${result.details ? ': ' + result.details : ''}
+          </div>
+        `;
+        resultsDiv.appendChild(testDiv);
+      });
+    }
+    
+    function runAllTests() {
+      testResults.length = 0;
+      
+      // Test 1: Notification container exists in HTML
+      const container = document.getElementById('notification-container');
+      recordTest(
+        'Notification Container Exists',
+        'HTML must include a notification container element',
+        container !== null,
+        container ? 'Found #notification-container' : 'Container not found'
+      );
+      
+      // Test 2: NotificationManager.show() function exists
+      const showFunctionExists = typeof NotificationManager !== 'undefined' && 
+                                  typeof NotificationManager.show === 'function';
+      recordTest(
+        'NotificationManager.show() Function',
+        'JavaScript must implement NotificationManager with show() function',
+        showFunctionExists,
+        showFunctionExists ? 'Function is defined' : 'Function not found'
+      );
+      
+      // Test 3: Function accepts required parameters
+      if (showFunctionExists) {
+        const functionString = NotificationManager.show.toString();
+        const hasMessageParam = functionString.includes('message');
+        const hasTypeParam = functionString.includes('type');
+        const hasDurationParam = functionString.includes('duration');
+        
+        recordTest(
+          'Function Parameters',
+          'show() must accept message, type, and duration parameters',
+          hasMessageParam && hasTypeParam && hasDurationParam,
+          `Parameters: ${hasMessageParam ? 'message ✓' : 'message ✗'}, ${hasTypeParam ? 'type ✓' : 'type ✗'}, ${hasDurationParam ? 'duration ✓' : 'duration ✗'}`
+        );
+      }
+      
+      // Test 4: CSS notification styles exist
+      const styles = Array.from(document.styleSheets)
+        .flatMap(sheet => {
+          try {
+            return Array.from(sheet.cssRules);
+          } catch {
+            return [];
+          }
+        })
+        .map(rule => rule.selectorText)
+        .filter(Boolean);
+      
+      const hasSuccessStyle = styles.some(s => s.includes('notification-success'));
+      const hasErrorStyle = styles.some(s => s.includes('notification-error'));
+      const hasWarningStyle = styles.some(s => s.includes('notification-warning'));
+      const hasInfoStyle = styles.some(s => s.includes('notification-info'));
+      
+      recordTest(
+        'Notification Type Styles',
+        'CSS must define styles for success, error, warning, and info notification types',
+        hasSuccessStyle && hasErrorStyle && hasWarningStyle && hasInfoStyle,
+        `Success: ${hasSuccessStyle ? '✓' : '✗'}, Error: ${hasErrorStyle ? '✓' : '✗'}, Warning: ${hasWarningStyle ? '✓' : '✗'}, Info: ${hasInfoStyle ? '✓' : '✗'}`
+      );
+      
+      // Test 5: Animation styles exist
+      const hasShowClass = styles.some(s => s && s.includes('.notification.show'));
+      recordTest(
+        'Animation Styles',
+        'CSS must include animation styles for slide-in effect',
+        hasShowClass,
+        hasShowClass ? 'Found .notification.show class' : 'Animation class not found'
+      );
+      
+      // Test 6: Test actual notification creation
+      if (showFunctionExists && container) {
+        try {
+          NotificationManager.show('Test notification', 'success', 1000);
+          
+          // Check if notification was added
+          setTimeout(() => {
+            const notifications = container.querySelectorAll('.notification');
+            const notificationCreated = notifications.length > 0;
+            
+            recordTest(
+              'Notification Creation',
+              'show() must create and display notification elements',
+              notificationCreated,
+              notificationCreated ? `Created ${notifications.length} notification(s)` : 'No notification created'
+            );
+            
+            // Test 7: Check notification has correct type class
+            if (notificationCreated) {
+              const hasTypeClass = notifications[0].classList.contains('notification-success');
+              recordTest(
+                'Notification Type Class',
+                'Created notification must have the correct type-specific CSS class',
+                hasTypeClass,
+                hasTypeClass ? 'Type class applied' : 'Type class missing'
+              );
+              
+              // Test 8: Check ARIA attributes
+              const hasAriaRole = notifications[0].hasAttribute('role');
+              recordTest(
+                'ARIA Attributes',
+                'Notification must have appropriate ARIA role for accessibility',
+                hasAriaRole,
+                hasAriaRole ? `role="${notifications[0].getAttribute('role')}"` : 'ARIA role missing'
+              );
+            }
+            
+            displayResults();
+          }, 100);
+          
+          return; // Wait for async test to complete
+        } catch (error) {
+          recordTest(
+            'Notification Creation',
+            'show() must create and display notification elements',
+            false,
+            `Error: ${error.message}`
+          );
+        }
+      }
+      
+      displayResults();
+    }
+    
+    // Run tests on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => runAllTests(), 100);
+    });
+  </script>
+</body>
+</html>

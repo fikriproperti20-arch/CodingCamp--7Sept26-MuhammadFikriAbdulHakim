@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotificationManager Tests</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      padding: var(--space-xl);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      color: var(--text-primary);
+      margin-bottom: var(--space-lg);
+    }
+    
+    .test-controls {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    
+    .test-section {
+      padding: var(--space-md);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+    }
+    
+    .test-section h2 {
+      margin-top: 0;
+      color: var(--text-primary);
+      font-size: var(--font-size-lg);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: var(--space-sm) var(--space-md);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-base);
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+      font-weight: 500;
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    
+    .btn-error {
+      background-color: var(--error-color);
+      color: white;
+    }
+    
+    .btn-warning {
+      background-color: var(--warning-color);
+      color: white;
+    }
+    
+    .btn-info {
+      background-color: var(--info-color);
+      color: white;
+    }
+    
+    .btn-theme {
+      background-color: var(--accent-color);
+      color: white;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+    }
+    
+    .test-description {
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>NotificationManager Tests</h1>
+  
+  <div class="test-controls">
+    <!-- Basic notification tests -->
+    <div class="test-section">
+      <h2>Basic Notification Types</h2>
+      <p class="test-description">Test each notification type with default 3-second duration.</p>
+      <div class="button-group">
+        <button class="btn-success" onclick="NotificationManager.show('Operation completed successfully!', 'success')">
+          Success
+        </button>
+        <button class="btn-error" onclick="NotificationManager.show('An error occurred while processing', 'error')">
+          Error
+        </button>
+        <button class="btn-warning" onclick="NotificationManager.show('Please review your settings', 'warning')">
+          Warning
+        </button>
+        <button class="btn-info" onclick="NotificationManager.show('Here is some useful information', 'info')">
+          Info
+        </button>
+      </div>
+    </div>
+    
+    <!-- Duration tests -->
+    <div class="test-section">
+      <h2>Custom Duration Tests</h2>
+      <p class="test-description">Test notifications with different display durations.</p>
+      <div class="button-group">
+        <button class="btn-info" onclick="NotificationManager.show('Short notification (1 second)', 'info', 1000)">
+          1 Second
+        </button>
+        <button class="btn-info" onclick="NotificationManager.show('Medium notification (5 seconds)', 'info', 5000)">
+          5 Seconds
+        </button>
+        <button class="btn-info" onclick="NotificationManager.show('Long notification (10 seconds)', 'info', 10000)">
+          10 Seconds
+        </button>
+      </div>
+    </div>
+    
+    <!-- Multiple notifications -->
+    <div class="test-section">
+      <h2>Multiple Notifications</h2>
+      <p class="test-description">Test displaying multiple notifications at once (stacking behavior).</p>
+      <div class="button-group">
+        <button class="btn-info" onclick="showMultiple()">
+          Show 4 Notifications
+        </button>
+        <button class="btn-info" onclick="showRapidFire()">
+          Rapid Fire (10 notifications)
+        </button>
+      </div>
+    </div>
+    
+    <!-- Long message tests -->
+    <div class="test-section">
+      <h2>Long Message Tests</h2>
+      <p class="test-description">Test notifications with longer text content.</p>
+      <div class="button-group">
+        <button class="btn-success" onclick="NotificationManager.show('This is a much longer notification message to test how the notification system handles text wrapping and longer content that might span multiple lines. The notification should remain readable and properly formatted.', 'success', 5000)">
+          Long Message
+        </button>
+      </div>
+    </div>
+    
+    <!-- Real-world scenario tests -->
+    <div class="test-section">
+      <h2>Real-World Scenarios</h2>
+      <p class="test-description">Test notifications that simulate actual application use cases.</p>
+      <div class="button-group">
+        <button class="btn-success" onclick="NotificationManager.show('Task added successfully', 'success')">
+          Task Added
+        </button>
+        <button class="btn-success" onclick="NotificationManager.show('Name saved successfully', 'success')">
+          Name Saved
+        </button>
+        <button class="btn-error" onclick="NotificationManager.show('Task description cannot be empty', 'error')">
+          Validation Error
+        </button>
+        <button class="btn-warning" onclick="NotificationManager.show('This task already exists', 'warning')">
+          Duplicate Warning
+        </button>
+        <button class="btn-error" onclick="NotificationManager.show('Storage quota exceeded', 'error')">
+          Storage Error
+        </button>
+        <button class="btn-success" onclick="NotificationManager.show('Pomodoro session completed! Great work!', 'success')">
+          Timer Complete
+        </button>
+      </div>
+    </div>
+    
+    <!-- Theme toggle -->
+    <div class="test-section">
+      <h2>Theme Test</h2>
+      <p class="test-description">Test notifications in both light and dark themes.</p>
+      <div class="button-group">
+        <button class="btn-theme" onclick="toggleTheme()">
+          Toggle Dark Mode
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    // Helper function to show multiple notifications
+    function showMultiple() {
+      NotificationManager.show('First notification', 'info', 5000);
+      setTimeout(() => NotificationManager.show('Second notification', 'success', 5000), 200);
+      setTimeout(() => NotificationManager.show('Third notification', 'warning', 5000), 400);
+      setTimeout(() => NotificationManager.show('Fourth notification', 'error', 5000), 600);
+    }
+    
+    // Helper function for rapid fire
+    function showRapidFire() {
+      for (let i = 1; i <= 10; i++) {
+        setTimeout(() => {
+          NotificationManager.show(`Notification #${i}`, 'info', 3000);
+        }, i * 100);
+      }
+    }
+    
+    // Toggle theme
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      NotificationManager.show(`Switched to ${newTheme} mode`, 'info');
+    }
+  </script>
+</body>
+</html>

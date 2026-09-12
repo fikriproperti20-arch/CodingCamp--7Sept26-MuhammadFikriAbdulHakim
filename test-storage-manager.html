@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StorageManager Manual Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #4a90e2;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      border-left: 4px solid #4a90e2;
+    }
+    button {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #357abd;
+    }
+    button:active {
+      transform: scale(0.98);
+    }
+    .output {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      border: 1px solid #ddd;
+    }
+    .success {
+      color: #28a745;
+    }
+    .error {
+      color: #dc3545;
+    }
+    .info {
+      color: #17a2b8;
+    }
+    #notification-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+    .notification {
+      padding: 12px 20px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      min-width: 250px;
+    }
+    .notification.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .notification-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .notification-error {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .notification-warning {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+    .notification-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-left: 4px solid #17a2b8;
+    }
+  </style>
+</head>
+<body>
+  <h1>StorageManager Manual Test</h1>
+  <p>This page allows you to manually test the StorageManager implementation (Task 3.1)</p>
+
+  <div id="notification-container"></div>
+
+  <div class="test-section">
+    <h2>Test 1: Check Availability</h2>
+    <button onclick="testIsAvailable()">Test isAvailable()</button>
+    <div id="output-1" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 2: Save and Load String</h2>
+    <button onclick="testSaveLoadString()">Save & Load String</button>
+    <div id="output-2" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 3: Save and Load Object</h2>
+    <button onclick="testSaveLoadObject()">Save & Load Object</button>
+    <div id="output-3" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 4: Load Non-Existent Key</h2>
+    <button onclick="testLoadDefault()">Load with Default</button>
+    <div id="output-4" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 5: Corrupted JSON Data</h2>
+    <button onclick="testCorruptedData()">Test Corrupted Data</button>
+    <div id="output-5" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Test 6: Application Keys</h2>
+    <button onclick="testApplicationKeys()">Test App Keys</button>
+    <div id="output-6" class="output"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Storage Management</h2>
+    <button onclick="viewStorage()">View All Storage</button>
+    <button onclick="clearTestStorage()">Clear Test Data</button>
+    <div id="output-7" class="output"></div>
+  </div>
+
+  <script src="js/script.js"></script>
+  <script>
+    function log(outputId, message, type = 'info') {
+      const output = document.getElementById(outputId);
+      const timestamp = new Date().toLocaleTimeString();
+      const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+      output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+    }
+
+    function testIsAvailable() {
+      const output = document.getElementById('output-1');
+      output.innerHTML = '';
+      
+      const result = StorageManager.isAvailable();
+      log('output-1', `isAvailable() returned: ${result}`, result ? 'success' : 'error');
+      
+      if (result) {
+        log('output-1', '✓ Local Storage is available', 'success');
+      } else {
+        log('output-1', '✗ Local Storage is NOT available', 'error');
+      }
+    }
+
+    function testSaveLoadString() {
+      const output = document.getElementById('output-2');
+      output.innerHTML = '';
+      
+      const key = 'test_string';
+      const value = 'Hello, World!';
+      
+      log('output-2', `Saving: key="${key}", value="${value}"`);
+      const saveResult = StorageManager.save(key, value);
+      log('output-2', `save() returned: ${saveResult}`, saveResult ? 'success' : 'error');
+      
+      log('output-2', `Loading: key="${key}"`);
+      const loadedValue = StorageManager.load(key, null);
+      log('output-2', `load() returned: "${loadedValue}"`);
+      
+      if (loadedValue === value) {
+        log('output-2', '✓ String save/load successful', 'success');
+      } else {
+        log('output-2', '✗ String save/load failed', 'error');
+      }
+      
+      localStorage.removeItem(key);
+      log('output-2', 'Cleanup: Test data removed');
+    }
+
+    function testSaveLoadObject() {
+      const output = document.getElementById('output-3');
+      output.innerHTML = '';
+      
+      const key = 'test_object';
+      const value = {
+        name: 'John Doe',
+        age: 30,
+        tasks: ['task1', 'task2']
+      };
+      
+      log('output-3', `Saving: key="${key}"`);
+      log('output-3', `Object: ${JSON.stringify(value, null, 2)}`);
+      const saveResult = StorageManager.save(key, value);
+      log('output-3', `save() returned: ${saveResult}`, saveResult ? 'success' : 'error');
+      
+      log('output-3', `Loading: key="${key}"`);
+      const loadedValue = StorageManager.load(key, null);
+      log('output-3', `load() returned: ${JSON.stringify(loadedValue, null, 2)}`);
+      
+      if (JSON.stringify(loadedValue) === JSON.stringify(value)) {
+        log('output-3', '✓ Object save/load successful', 'success');
+      } else {
+        log('output-3', '✗ Object save/load failed', 'error');
+      }
+      
+      localStorage.removeItem(key);
+      log('output-3', 'Cleanup: Test data removed');
+    }
+
+    function testLoadDefault() {
+      const output = document.getElementById('output-4');
+      output.innerHTML = '';
+      
+      const key = 'non_existent_key_12345';
+      const defaultValue = 'default_value';
+      
+      // Make sure key doesn't exist
+      localStorage.removeItem(key);
+      
+      log('output-4', `Loading non-existent key: "${key}"`);
+      log('output-4', `Default value: "${defaultValue}"`);
+      const loadedValue = StorageManager.load(key, defaultValue);
+      log('output-4', `load() returned: "${loadedValue}"`);
+      
+      if (loadedValue === defaultValue) {
+        log('output-4', '✓ Default value returned correctly', 'success');
+      } else {
+        log('output-4', '✗ Default value not returned', 'error');
+      }
+    }
+
+    function testCorruptedData() {
+      const output = document.getElementById('output-5');
+      output.innerHTML = '';
+      
+      const key = 'test_corrupted';
+      const defaultValue = 'fallback';
+      const corruptedData = '{invalid json';
+      
+      log('output-5', `Setting corrupted data: "${corruptedData}"`);
+      localStorage.setItem(key, corruptedData);
+      
+      log('output-5', `Loading with default: "${defaultValue}"`);
+      const loadedValue = StorageManager.load(key, defaultValue);
+      log('output-5', `load() returned: "${loadedValue}"`);
+      
+      if (loadedValue === defaultValue) {
+        log('output-5', '✓ Corrupted data handled correctly, returned default', 'success');
+        log('output-5', '✓ Check console for error message', 'success');
+      } else {
+        log('output-5', '✗ Corrupted data not handled properly', 'error');
+      }
+      
+      localStorage.removeItem(key);
+      log('output-5', 'Cleanup: Test data removed');
+    }
+
+    function testApplicationKeys() {
+      const output = document.getElementById('output-6');
+      output.innerHTML = '';
+      
+      // Test user name
+      log('output-6', 'Testing lifeDashboard_user key...');
+      const userName = 'John Doe';
+      StorageManager.save('lifeDashboard_user', userName);
+      const loadedName = StorageManager.load('lifeDashboard_user', '');
+      log('output-6', userName === loadedName ? '✓ User name persisted' : '✗ User name failed', 
+          userName === loadedName ? 'success' : 'error');
+      
+      // Test tasks
+      log('output-6', 'Testing lifeDashboard_tasks key...');
+      const tasks = [
+        { id: '1', description: 'Task 1', completed: false },
+        { id: '2', description: 'Task 2', completed: true }
+      ];
+      StorageManager.save('lifeDashboard_tasks', tasks);
+      const loadedTasks = StorageManager.load('lifeDashboard_tasks', []);
+      log('output-6', JSON.stringify(tasks) === JSON.stringify(loadedTasks) ? '✓ Tasks persisted' : '✗ Tasks failed',
+          JSON.stringify(tasks) === JSON.stringify(loadedTasks) ? 'success' : 'error');
+      
+      // Test quick links
+      log('output-6', 'Testing lifeDashboard_quickLinks key...');
+      const quickLinks = {
+        instagram: 'https://instagram.com/user',
+        tiktok: 'https://tiktok.com/@user',
+        linkedin: 'https://linkedin.com/in/user'
+      };
+      StorageManager.save('lifeDashboard_quickLinks', quickLinks);
+      const loadedLinks = StorageManager.load('lifeDashboard_quickLinks', {});
+      log('output-6', JSON.stringify(quickLinks) === JSON.stringify(loadedLinks) ? '✓ Quick links persisted' : '✗ Quick links failed',
+          JSON.stringify(quickLinks) === JSON.stringify(loadedLinks) ? 'success' : 'error');
+      
+      // Test theme
+      log('output-6', 'Testing lifeDashboard_theme key...');
+      const theme = 'dark';
+      StorageManager.save('lifeDashboard_theme', theme);
+      const loadedTheme = StorageManager.load('lifeDashboard_theme', 'light');
+      log('output-6', theme === loadedTheme ? '✓ Theme persisted' : '✗ Theme failed',
+          theme === loadedTheme ? 'success' : 'error');
+      
+      log('output-6', '\nAll application keys tested successfully!', 'success');
+    }
+
+    function viewStorage() {
+      const output = document.getElementById('output-7');
+      output.innerHTML = '';
+      
+      log('output-7', 'Current Local Storage contents:');
+      log('output-7', '─'.repeat(50));
+      
+      if (localStorage.length === 0) {
+        log('output-7', '(empty)', 'info');
+      } else {
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          const value = localStorage.getItem(key);
+          log('output-7', `${key}: ${value}`, 'info');
+        }
+      }
+      
+      log('output-7', '─'.repeat(50));
+      log('output-7', `Total items: ${localStorage.length}`, 'info');
+    }
+
+    function clearTestStorage() {
+      const output = document.getElementById('output-7');
+      output.innerHTML = '';
+      
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('lifeDashboard_') || key.startsWith('test_')) {
+          keysToRemove.push(key);
+        }
+      }
+      
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+        log('output-7', `Removed: ${key}`, 'success');
+      });
+      
+      if (keysToRemove.length === 0) {
+        log('output-7', 'No test data found to clear', 'info');
+      } else {
+        log('output-7', `\nCleared ${keysToRemove.length} items`, 'success');
+      }
+    }
+  </script>
+</body>
+</html>

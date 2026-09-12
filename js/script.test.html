@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StorageManager Tests</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .test-pass {
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    .test-fail {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
+    .test-info {
+      background-color: #d1ecf1;
+      border-color: #bee5eb;
+    }
+    h1 {
+      color: #333;
+    }
+    h2 {
+      color: #555;
+      margin-top: 0;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    .summary {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 4px;
+    }
+    button {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover {
+      background: #357abd;
+    }
+  </style>
+</head>
+<body>
+  <h1>StorageManager Unit Tests</h1>
+  <p>This page tests the StorageManager implementation for Task 3.1</p>
+  
+  <div>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+  </div>
+
+  <div id="test-results"></div>
+
+  <script src="script.js"></script>
+  <script>
+    // Test utilities
+    const testResults = [];
+    
+    function assert(condition, message) {
+      if (!condition) {
+        throw new Error(message || 'Assertion failed');
+      }
+    }
+    
+    function assertEqual(actual, expected, message) {
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        throw new Error(`${message || 'Values not equal'}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+      }
+    }
+    
+    function recordTest(testName, passed, error = null) {
+      testResults.push({
+        name: testName,
+        passed: passed,
+        error: error
+      });
+    }
+    
+    function displayResults() {
+      const container = document.getElementById('test-results');
+      container.innerHTML = '';
+      
+      const passedCount = testResults.filter(r => r.passed).length;
+      const totalCount = testResults.length;
+      
+      const summary = document.createElement('div');
+      summary.className = 'summary';
+      summary.textContent = `Tests: ${passedCount}/${totalCount} passed`;
+      summary.style.color = passedCount === totalCount ? '#28a745' : '#dc3545';
+      container.appendChild(summary);
+      
+      testResults.forEach(result => {
+        const testDiv = document.createElement('div');
+        testDiv.className = `test-section ${result.passed ? 'test-pass' : 'test-fail'}`;
+        
+        const title = document.createElement('h2');
+        title.textContent = `${result.passed ? '✓' : '✗'} ${result.name}`;
+        testDiv.appendChild(title);
+        
+        if (!result.passed && result.error) {
+          const errorPre = document.createElement('pre');
+          errorPre.textContent = result.error;
+          testDiv.appendChild(errorPre);
+        }
+        
+        container.appendChild(testDiv);
+      });
+    }
+    
+    // Clear all test data from storage
+    function clearStorage() {
+      localStorage.clear();
+      console.log('Storage cleared');
+      alert('Local Storage cleared!');
+    }
+    
+    // ========================================================================
+    // Test Suite
+    // ========================================================================
+    
+    function testIsAvailable() {
+      try {
+        const result = StorageManager.isAvailable();
+        assert(typeof result === 'boolean', 'isAvailable should return a boolean');
+        assert(result === true, 'Local Storage should be available in this environment');
+        recordTest('isAvailable() returns true when storage is available', true);
+      } catch (error) {
+        recordTest('isAvailable() returns true when storage is available', false, error.message);
+      }
+    }
+    
+    function testSaveAndLoadString() {
+      try {
+        const key = 'test_string';
+        const value = 'Hello, World!';
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, null);
+        assertEqual(loadedValue, value, 'Loaded value should match saved value');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with string values', true);
+      } catch (error) {
+        recordTest('save() and load() work with string values', false, error.message);
+      }
+    }
+    
+    function testSaveAndLoadNumber() {
+      try {
+        const key = 'test_number';
+        const value = 42;
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, null);
+        assertEqual(loadedValue, value, 'Loaded value should match saved value');
+        assertEqual(typeof loadedValue, 'number', 'Loaded value should be a number');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with number values', true);
+      } catch (error) {
+        recordTest('save() and load() work with number values', false, error.message);
+      }
+    }
+    
+    function testSaveAndLoadObject() {
+      try {
+        const key = 'test_object';
+        const value = {
+          name: 'John Doe',
+          age: 30,
+          tasks: ['task1', 'task2']
+        };
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, null);
+        assertEqual(loadedValue, value, 'Loaded object should match saved object');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with object values', true);
+      } catch (error) {
+        recordTest('save() and load() work with object values', false, error.message);
+      }
+    }
+    
+    function testSaveAndLoadArray() {
+      try {
+        const key = 'test_array';
+        const value = [1, 2, 3, 'four', { five: 5 }];
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, null);
+        assertEqual(loadedValue, value, 'Loaded array should match saved array');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with array values', true);
+      } catch (error) {
+        recordTest('save() and load() work with array values', false, error.message);
+      }
+    }
+    
+    function testLoadNonExistentKey() {
+      try {
+        const key = 'non_existent_key_12345';
+        const defaultValue = 'default';
+        
+        // Make sure key doesn't exist
+        localStorage.removeItem(key);
+        
+        const loadedValue = StorageManager.load(key, defaultValue);
+        assertEqual(loadedValue, defaultValue, 'load should return default value for non-existent key');
+        
+        recordTest('load() returns default value when key does not exist', true);
+      } catch (error) {
+        recordTest('load() returns default value when key does not exist', false, error.message);
+      }
+    }
+    
+    function testLoadWithNullReturnsDefault() {
+      try {
+        const key = 'test_null_key';
+        const defaultValue = { empty: true };
+        
+        // Ensure key doesn't exist
+        localStorage.removeItem(key);
+        
+        const loadedValue = StorageManager.load(key, defaultValue);
+        assertEqual(loadedValue, defaultValue, 'load should return default value when item is null');
+        
+        recordTest('load() returns default value when item is null', true);
+      } catch (error) {
+        recordTest('load() returns default value when item is null', false, error.message);
+      }
+    }
+    
+    function testLoadCorruptedData() {
+      try {
+        const key = 'test_corrupted';
+        const defaultValue = 'fallback';
+        
+        // Manually set corrupted JSON data
+        localStorage.setItem(key, '{invalid json');
+        
+        const loadedValue = StorageManager.load(key, defaultValue);
+        assertEqual(loadedValue, defaultValue, 'load should return default value for corrupted JSON');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('load() returns default value for corrupted JSON data', true);
+      } catch (error) {
+        recordTest('load() returns default value for corrupted JSON data', false, error.message);
+      }
+    }
+    
+    function testSaveBoolean() {
+      try {
+        const key = 'test_boolean';
+        const value = true;
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, null);
+        assertEqual(loadedValue, value, 'Loaded boolean should match saved boolean');
+        assertEqual(typeof loadedValue, 'boolean', 'Loaded value should be a boolean');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with boolean values', true);
+      } catch (error) {
+        recordTest('save() and load() work with boolean values', false, error.message);
+      }
+    }
+    
+    function testSaveNull() {
+      try {
+        const key = 'test_null';
+        const value = null;
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, 'default');
+        assertEqual(loadedValue, value, 'Loaded null should be null');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with null values', true);
+      } catch (error) {
+        recordTest('save() and load() work with null values', false, error.message);
+      }
+    }
+    
+    function testMultipleKeys() {
+      try {
+        const keys = ['key1', 'key2', 'key3'];
+        const values = ['value1', 123, { data: 'test' }];
+        
+        // Save all
+        keys.forEach((key, index) => {
+          const saveResult = StorageManager.save(key, values[index]);
+          assert(saveResult === true, `save should return true for ${key}`);
+        });
+        
+        // Load all and verify
+        keys.forEach((key, index) => {
+          const loadedValue = StorageManager.load(key, null);
+          assertEqual(loadedValue, values[index], `Loaded value should match for ${key}`);
+        });
+        
+        // Cleanup
+        keys.forEach(key => localStorage.removeItem(key));
+        
+        recordTest('save() and load() work with multiple keys', true);
+      } catch (error) {
+        recordTest('save() and load() work with multiple keys', false, error.message);
+      }
+    }
+    
+    function testEmptyString() {
+      try {
+        const key = 'test_empty_string';
+        const value = '';
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, 'default');
+        assertEqual(loadedValue, value, 'Loaded value should be empty string');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with empty string', true);
+      } catch (error) {
+        recordTest('save() and load() work with empty string', false, error.message);
+      }
+    }
+    
+    function testNestedObject() {
+      try {
+        const key = 'test_nested';
+        const value = {
+          level1: {
+            level2: {
+              level3: {
+                data: [1, 2, 3],
+                flag: true
+              }
+            }
+          }
+        };
+        
+        const saveResult = StorageManager.save(key, value);
+        assert(saveResult === true, 'save should return true on success');
+        
+        const loadedValue = StorageManager.load(key, null);
+        assertEqual(loadedValue, value, 'Loaded nested object should match saved nested object');
+        
+        // Cleanup
+        localStorage.removeItem(key);
+        
+        recordTest('save() and load() work with deeply nested objects', true);
+      } catch (error) {
+        recordTest('save() and load() work with deeply nested objects', false, error.message);
+      }
+    }
+    
+    // Test actual application keys
+    function testApplicationKeys() {
+      try {
+        // Test user name
+        const userName = 'John Doe';
+        StorageManager.save('lifeDashboard_user', userName);
+        const loadedName = StorageManager.load('lifeDashboard_user', '');
+        assertEqual(loadedName, userName, 'User name should persist');
+        
+        // Test tasks
+        const tasks = [
+          { id: '1', description: 'Task 1', completed: false },
+          { id: '2', description: 'Task 2', completed: true }
+        ];
+        StorageManager.save('lifeDashboard_tasks', tasks);
+        const loadedTasks = StorageManager.load('lifeDashboard_tasks', []);
+        assertEqual(loadedTasks, tasks, 'Tasks should persist');
+        
+        // Test quick links
+        const quickLinks = {
+          instagram: 'https://instagram.com/user',
+          tiktok: 'https://tiktok.com/@user',
+          linkedin: 'https://linkedin.com/in/user'
+        };
+        StorageManager.save('lifeDashboard_quickLinks', quickLinks);
+        const loadedLinks = StorageManager.load('lifeDashboard_quickLinks', {});
+        assertEqual(loadedLinks, quickLinks, 'Quick links should persist');
+        
+        // Test theme
+        const theme = 'dark';
+        StorageManager.save('lifeDashboard_theme', theme);
+        const loadedTheme = StorageManager.load('lifeDashboard_theme', 'light');
+        assertEqual(loadedTheme, theme, 'Theme should persist');
+        
+        // Cleanup
+        localStorage.removeItem('lifeDashboard_user');
+        localStorage.removeItem('lifeDashboard_tasks');
+        localStorage.removeItem('lifeDashboard_quickLinks');
+        localStorage.removeItem('lifeDashboard_theme');
+        
+        recordTest('Application-specific storage keys work correctly', true);
+      } catch (error) {
+        recordTest('Application-specific storage keys work correctly', false, error.message);
+      }
+    }
+    
+    // ========================================================================
+    // Run all tests
+    // ========================================================================
+    
+    function runAllTests() {
+      testResults.length = 0; // Clear previous results
+      
+      console.log('Running StorageManager tests...');
+      
+      // Run all test functions
+      testIsAvailable();
+      testSaveAndLoadString();
+      testSaveAndLoadNumber();
+      testSaveAndLoadObject();
+      testSaveAndLoadArray();
+      testLoadNonExistentKey();
+      testLoadWithNullReturnsDefault();
+      testLoadCorruptedData();
+      testSaveBoolean();
+      testSaveNull();
+      testMultipleKeys();
+      testEmptyString();
+      testNestedObject();
+      testApplicationKeys();
+      
+      displayResults();
+      
+      console.log('Tests complete. Check the page for results.');
+    }
+    
+    // Run tests on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      runAllTests();
+    });
+  </script>
+</body>
+</html>
